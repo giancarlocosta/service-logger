@@ -1,7 +1,6 @@
 'use strict';
 
 const winston = require('winston');
-const projectRootPath = process.env.PROJECT_ROOT || __dirname;
 
 // logger emits errors so supress them
 winston.emitErrs = false;
@@ -10,6 +9,7 @@ winston.emitErrs = false;
  * Return filepath following the root path of this project.
  */
 function parsePath(filePath) {
+  const projectRootPath = process.env.PROJECT_ROOT || __dirname;
   return filePath.split(projectRootPath)[1];
 }
 
@@ -27,10 +27,6 @@ const winstonLogger = new (winston.Logger)({
     new (winston.transports.Console)({
       timestamp: isoTimestamp,
       colorize: true
-    }),
-    new (winston.transports.File)({
-      name: 'security-suite.log',
-      filename: `${process.env.AUDIT_LOG_PATH}`
     })
   ]
 });
@@ -40,7 +36,7 @@ const winstonLogger = new (winston.Logger)({
  * Class wrapper around winston.
  * A new instance of this class should be instantiated in each file that will be
  * doing logging like so:
- *  const logger = new Logger(__dirname);
+ *  const logger = new Logger(__filename);
  */
 class Logger {
 
@@ -50,6 +46,7 @@ class Logger {
    */
   constructor(filename) {
     this._filename = parsePath(filename) ? parsePath(filename) : filename;
+    this._logLevel = (process.env.LOG_LEVEL || 'WARN,ERROR').toUpperCase();
   }
 
   /**
@@ -69,27 +66,61 @@ class Logger {
   }
 
   /**
+   * Set the levels that this Logger is allowed to log
+   * @param {string} levels - comma separated string list of levels. See Winston
+   *   documentation for available levels
+   */
+  set logLevel(levels) {
+    this._logLevel = levels.toUpperCase();
+  }
+
+  /**
+   * Get the levels this Logger is allowed to log
+   * @return {string}
+   */
+  get logLevel() {
+    return this._logLevel;
+  }
+
+  /**
+   * Get winston instance
+   * @return {string}
+   */
+  getWinstonInstance() {
+    return winston;
+  }
+
+  /**
+   * Get winston logger instance
+   * @return {string}
+   */
+  getWinstonLoggerInstance() {
+    return winstonLogger;
+  }
+
+  /**
    * Function to check if passed level is included (enabled) in env variables
    * @param {string} level - level to check against env variables
    * @return {Boolean} true if level enabled
    */
   levelEnabled(level) {
-    return process.env.LOG_LEVEL && (process.env.LOG_LEVEL === '*'
-      || process.env.LOG_LEVEL.indexOf(level) !== -1);
+    const enabledLevels = process.env.LOG_LEVEL || this._logLevel;
+    return enabledLevels && (enabledLevels === '*'
+      || enabledLevels.toUpperCase().indexOf(level.toUpperCase()) !== -1);
   }
 
   /**
    * Main logging function that should be used in all files.
    * @param {string} level - log level to use
-   * @param {string} message - main log message
+   * @param {string|Error} message - main log message or Error object
    * @param {Object} [metadata] - object containing any additional information
    *  you wish to log
    */
   log(level, message, metadata) {
-    if (typeof level === 'string' && this.levelEnabled(level.toUpperCase())) {
-      if (message instanceof Error) {
-        this.logError(level, message, metadata);
-      } else {
+    if (message instanceof Error) {
+      this.logError(level, message, metadata);
+    } else {
+      if (typeof level === 'string' && this.levelEnabled(level)) {
         winstonLogger.log(level, message, { file: this._filename, metadata });
       }
     }
@@ -105,7 +136,7 @@ class Logger {
    */
   logError(level, err, metadata) {
     if (err instanceof Error) {
-      if (this.levelEnabled(level.toUpperCase())) {
+      if (this.levelEnabled(level)) {
         winstonLogger.log(level, err.name + ' - ' + err.message + ' - \n' + err.stack, {
           file: this._filename, metadata
         });
@@ -117,7 +148,7 @@ class Logger {
   }
 
   toString() {
-    return 'Logger for file:' + this._filename;
+    return 'Logger for file: ' + this._filename;
   }
 }
 
