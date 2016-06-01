@@ -1,0 +1,35 @@
+before_script:
+  - rm -rf ci-config
+  - git clone git@gitlab.e1c.net:ops/ci-config
+
+stages:
+  - test
+  - semver
+  - sinopia
+
+runTests:
+  stage: test
+  except:
+    - tags
+  script:
+    - ./ci-config/build.sh test
+  tags:
+    - node
+
+semverBump:
+  stage: semver
+  only:
+    - develop
+  script:
+    - ./ci-config/build.sh semver
+  tags:
+    - node
+
+sinopia:
+  stage: sinopia
+  only:
+    - tags
+  script:
+    - ./ci-config/build.sh sinopia
+  tags:
+    - node

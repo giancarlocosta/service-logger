@@ -1,0 +1,51 @@
+{
+  "name": "service-logger",
+  "version": "0.1.0",
+  "description": "Simplified node microservice logger extending Winston",
+  "license": "UNLICENSED",
+  "publishConfig": {
+    "registry": "https://npm.e1c.net"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://gitlab.e1c.net/gcosta/service-logger"
+  },
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha test/*Test.js",
+    "eslint": "eslint $@ **/*.js *.js",
+    "ci": "npm run eslint && npm run test"
+  },
+  "eslintConfig": {
+    "extends": [
+      "e1c/es6/node",
+      "e1c/test/mocha",
+      "e1c/test/chai"
+    ]
+  },
+  "dependencies": {
+    "bluebird": "^3.0.6",
+    "fs-promise": "^0.3.1",
+    "winston": "^2.2.0"
+  },
+  "devDependencies": {
+    "chai": "^3.4.1",
+    "eslint-config-e1c": "^4.1.0",
+    "mocha": "^2.3.4"
+  },
+  "files": [
+    "index.js",
+    "lib"
+  ],
+  "pre-commit": [
+    "eslint"
+  ],
+  "directories": {
+    "test": "test"
+  },
+  "keywords": [
+    "service-logger",
+    "logger"
+  ],
+  "author": "Gian Costa"
+}
