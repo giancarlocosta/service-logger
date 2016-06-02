@@ -10,7 +10,7 @@ describe('Logger Tests', () => {
     Promise.coroutine(function* () {
       try {
         done();
-      } catch(err) {
+      } catch (err) {
         done(new Error(err));
       }
     })();
@@ -50,7 +50,7 @@ describe('Logger Tests', () => {
 
         done();
 
-      } catch(err) {
+      } catch (err) {
         done(new Error(err));
       }
     })();
@@ -78,7 +78,7 @@ describe('Logger Tests', () => {
 
         done();
 
-      } catch(err) {
+      } catch (err) {
         done(new Error(err));
       }
     })();
