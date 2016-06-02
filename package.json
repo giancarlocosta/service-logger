@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "description": "Simplified node microservice logger extending Winston",
   "license": "UNLICENSED",
+  "author": "Gian Costa",
   "publishConfig": {
     "registry": "https://npm.e1c.net"
   },
@@ -46,6 +47,5 @@
   "keywords": [
     "service-logger",
     "logger"
-  ],
-  "author": "Gian Costa"
+  ]
 }

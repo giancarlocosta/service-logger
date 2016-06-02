@@ -61,6 +61,21 @@ describe('Logger Tests', () => {
     Promise.coroutine(function* () {
       try {
 
+        // Use winston instance to add transports
+        process.env.LOG_LEVEL = 'INFO,WARN,ERROR';
+        let logger = new (require('../index.js'))(__filename);
+        const winston = logger.getWinstonInstance();
+        const winstonLogger = logger.getWinstonLoggerInstance();
+        winstonLogger.add(winston.transports.File, {
+          name: 'audit_log',
+          filename: 'test.log'
+        });
+
+        logger.log('info', 'Should show in console and file');
+
+        logger = new (require('../index.js'))(__filename);
+        logger.log('info', 'Should show in console and file also');
+
         done();
 
       } catch(err) {

@@ -4,11 +4,11 @@
 --------------------------------------------------------------------------------
 ## Overview
 
-This module is a wrapper around Winston meant to simplify but not limit how
+This module is a wrapper around Winston meant to **simplify but not limit** how
 business logic does its logging. The class exposed by this module only provides
 convenient functionality wrapped around basic Winston functionality that should
 be needed by microservices in most cases. <br/><br/>
-For special cases it exposes the winston module and
+For special cases it exposes the winston module itself and
 the user can extend and interact with Winston as they would normally. However,
 in these cases it is important that the user understands how to use Winston as
 well as the source code in this project to avoid unexpected behavior.
@@ -22,7 +22,8 @@ In order for the logger to work as you intend, you must set the following ENV
 variables correctly:
 
 - `process.env.PROJECT_ROOT`<br/>If this is set with the path of the root of the
-project, the logger will use this to show filepaths of the files producing the log statements relative to the root. If not set the full paths will likely be shown.
+project, the logger will use this to show filepaths of the files producing the
+log statements relative to the root. If not set the full paths will likely be shown.
 
 - `process.env.LOG_LEVEL`<br/>This must be the list of acceptable levels for the
 Logger to log.
@@ -38,11 +39,11 @@ setting the `logLevel` property of the instantiated Logger using:
 const logger = new (require('service-logger'))(__filename);
 logger.logLevel='INFO,WARN';
 ```
-**Setting the logLevel property WILL HAVE NO EFFECT if LOG_LEVEL is set.**
+**Setting the logLevel property WILL HAVE NO EFFECT if LOG_LEVEL env var is set**
 
 #### How to Log
 
-1. First set you env vars described above correctly
+1. First set your env vars correctly as described above
 2. As early as possible in your app load/require the module.
 When you require this module, it will require 'winston' so winston will also
 be initialized in the same way as if you were using winston without this module.
@@ -62,7 +63,8 @@ const winstonLogger = logger.getWinstonLoggerInstance();
 ```
 See test/ for more examples.<br/>
 Again, this is not recommended but if it is necessary then make sure you are
-familiar with the source code of this project as well as [Winston](https://github.com/winstonjs/winston)
+familiar with the source code of this project as well as
+[Winston](https://github.com/winstonjs/winston)
 
 3. Use the logger! From the source code documentation:
 <br/>

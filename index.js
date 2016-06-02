@@ -1,9 +1,7 @@
 'use strict';
 
 const winston = require('winston');
-
-// logger emits errors so supress them
-winston.emitErrs = false;
+winston.emitErrs = false; // winston logger emits errors so supress them
 
 /**
  * Return filepath following the root path of this project.
