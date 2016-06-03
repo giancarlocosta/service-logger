@@ -19,17 +19,23 @@ describe('Logger Tests', () => {
   it(`should test essential functionality`, (done) => {
     Promise.coroutine(function* () {
       try {
-        process.env.PROJECT_ROOT = __dirname;
+        // Set project root so no auto inferring process.env.PROJECT_ROOT = __dirname;
+        // Infer project root path
         let logger = new (require('../index.js'))(__filename);
 
         // Normal logging
         process.env.LOG_LEVEL = 'INFO,WARN,ERROR';
-        logger.log('badLevel', 'Level isnt valid. Should not log');
         logger.log('info', 'Basic test');
+        logger.log('badLevel', 'Level isnt valid. Should not log');
         logger.log('info', 'Object metadata included', {
           prop1: 'p1',
           prop2: 'p2'
         });
+
+        // Shortcut methods
+        logger.info('Basic test');
+        logger.warn('Basic test');
+        logger.error('Basic test');
 
         // Log Error objects
         const appError = new Error('AppError');

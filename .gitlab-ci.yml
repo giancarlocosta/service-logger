@@ -19,7 +19,7 @@ runTests:
 semverBump:
   stage: semver
   only:
-    - master
+    - develop
   script:
     - ./ci-config/build.sh semver
   tags:
