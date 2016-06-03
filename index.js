@@ -133,8 +133,8 @@ class Logger {
    *  you wish to log
    */
   logError(level, err, metadata) {
-    if (err instanceof Error) {
-      if (this.levelEnabled(level)) {
+    if (this.levelEnabled(level)) {
+      if (err instanceof Error) {
         winstonLogger.log(level, err.name + ' - ' + err.message + ' - \n' + err.stack, {
           file: this._filename, metadata
         });
