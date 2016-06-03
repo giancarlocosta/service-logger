@@ -103,7 +103,7 @@ class Logger {
    */
   levelEnabled(level) {
     const enabledLevels = process.env.LOG_LEVEL || this._logLevel;
-    return enabledLevels && (enabledLevels === '*'
+    return enabledLevels && typeof level === 'string' && (enabledLevels === '*'
       || enabledLevels.toUpperCase().indexOf(level.toUpperCase()) !== -1);
   }
 
@@ -115,10 +115,10 @@ class Logger {
    *  you wish to log
    */
   log(level, message, metadata) {
-    if (message instanceof Error) {
-      this.logError(level, message, metadata);
-    } else {
-      if (typeof level === 'string' && this.levelEnabled(level)) {
+    if (this.levelEnabled(level)) {
+      if (message instanceof Error) {
+        this.logError(level, message, metadata);
+      } else {
         winstonLogger.log(level, message, { file: this._filename, metadata });
       }
     }
