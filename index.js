@@ -2,15 +2,31 @@
 
 const winston = require('winston');
 winston.emitErrs = false; // winston logger emits errors so supress them
+let projectRootPath = undefined;
 
 /**
  * Return filepath following the root path of this project.
  */
 function parsePath(filePath) {
-  const projectRootPath = process.env.PROJECT_ROOT || __dirname;
   return filePath.split(projectRootPath)[1];
 }
 
+
+/**
+ * Return longest common beginning string between all provided strings in
+ * 'stringArray'
+ */
+function longestCommonStartString(stringArray) {
+  const sortedArr = stringArray.concat().sort();
+  const shortestString = sortedArr[0];
+  const longestString = sortedArr[sortedArr.length - 1];
+  const shortestStringLength = shortestString.length;
+  let i = 0;
+  while (i < shortestStringLength && shortestString.charAt(i) === longestString.charAt(i)) {
+    i++;
+  }
+  return shortestString.substring(0, i);
+}
 
 /**
  * Return current time string in ISO format
@@ -43,7 +59,11 @@ class Logger {
    * @param {string} filename - Filename to use in log statements
    */
   constructor(filename) {
-    this._filename = parsePath(filename) ? parsePath(filename) : filename;
+    // Only set project root once
+    projectRootPath = projectRootPath || process.env.PROJECT_ROOT || longestCommonStartString([__filename, module.parent.filename]);
+    const projectRootRelativePath = parsePath(filename);
+
+    this._filename = projectRootRelativePath ? projectRootRelativePath : filename;
     this._logLevel = (process.env.LOG_LEVEL || 'WARN,ERROR').toUpperCase();
   }
 
@@ -143,6 +163,18 @@ class Logger {
         winstonLogger.log(level, err, { file: this._filename, metadata });
       }
     }
+  }
+
+  info(message, metadata) {
+    this.log('info', message, metadata);
+  }
+
+  warn(message, metadata) {
+    this.log('warn', message, metadata);
+  }
+
+  error(message, metadata) {
+    this.log('error', message, metadata);
   }
 
   toString() {

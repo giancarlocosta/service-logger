@@ -23,7 +23,31 @@ variables correctly:
 
 - `process.env.PROJECT_ROOT`<br/>If this is set with the path of the root of the
 project, the logger will use this to show filepaths of the files producing the
-log statements relative to the root. If not set the full paths will likely be shown.
+log statements relative to the root.
+If this is not set, the logger will attempt to infer the project root by doing
+the following:
+  1. Assume that the service-logger package is somewhere in the project directory,
+ (ideally in node_module)
+  2. Get the path of the first module in the project to require('service-logger')
+  3. Compare that path to path of the index.js file in the service-logger package
+  4. The longest common beginning substring of these two paths will be used as the
+the project root.
+
+  For example, if the path of the index.js file in the service-logger package is:
+
+  `/Users/gcosta/Desktop/Team/Projects/security-suite/security-service/node_modules/service-logger/index.js`
+
+  and the first file that the package is required in is:
+
+  `/Users/gcosta/Desktop/Team/Projects/security-suite/security-service/app.js`
+
+  the longest common beginning substring is
+
+  `/Users/gcosta/Desktop/Team/Projects/security-suite/security-service/`
+
+  so this will be used as the project root and the `file` property in the logs
+  will now contain the path of the file relative to the root path
+
 
 - `process.env.LOG_LEVEL`<br/>This must be the list of acceptable levels for the
 Logger to log.
