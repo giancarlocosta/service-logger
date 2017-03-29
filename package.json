@@ -1,15 +1,15 @@
 {
   "name": "service-logger",
-  "version": "v0.2.1",
+  "version": "v0.2.2",
   "description": "Simplified node microservice logger extending Winston.",
   "license": "",
   "author": "Gian Costa",
   "publishConfig": {
-    "registry": "https://npm.e1c.net"
+    "registry": "https://registry.npmjs.org"
   },
   "repository": {
     "type": "git",
-    "url": "https://gitlab.e1c.net/gcosta/service-logger"
+    "url": "https://github.com/giancarlocosta/service-logger.git"
   },
   "main": "index.js",
   "scripts": {
