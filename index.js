@@ -70,13 +70,10 @@ class Logger {
 
     if (this._logLevel.indexOf('*') !== -1) {
       this._logLevel = 'debug';
-    } else {
-      if (this._logLevel.indexOf('warn') !== -1) {
-        this._logLevel = 'warning';
-      } else {
-        this._logLevel = 'debug';
-      }
+    } else if (!winston.config.syslog.levels[this._logLevel]) {
+      throw new Error(this._logLevel + ' is not a valid log level. It must be ONE value equal to one of the RFC5424 the syslog levels in Winston');
     }
+
     winstonLogger.transports.console.level = this._logLevel;
   }
 
