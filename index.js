@@ -139,7 +139,8 @@ class Logger {
     if (message instanceof Error) {
       this.logError(level, message, metadata);
     } else {
-      winstonLogger.log(level, message, { file: this._filename, metadata });
+      const formattedMessage = this._filename + ' - ' + message;
+      winstonLogger.log(level, formattedMessage, metadata || null);
     }
   }
 
@@ -153,12 +154,11 @@ class Logger {
   */
   logError(level, err, metadata) {
     if (err instanceof Error) {
-      winstonLogger.log(level, err.name + ' - ' + err.message + ' - \n' + err.stack, {
-        file: this._filename, metadata
-      });
+      winstonLogger.log(level, this._filename + ' - ' + err.name + ' - ' + err.message + ' - \n' + err.stack, metadata || null);
     } else {
       // Probably shouldn't throw non-Error objects
-      winstonLogger.log(level, err, { file: this._filename, metadata });
+      const formattedErr = this._filename + ' - ' + JSON.stringify(err);
+      winstonLogger.log(level, formattedErr, metadata || null);
     }
   }
 
