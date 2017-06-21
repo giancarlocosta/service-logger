@@ -15,8 +15,6 @@ runTests:
     - tags
   script:
     - ./ci-config/build.sh test
-  tags:
-    - node
 
 semverBump:
   stage: semver
@@ -24,8 +22,6 @@ semverBump:
     - develop
   script:
     - ./ci-config/build.sh semver
-  tags:
-    - node
 
 sinopia:
   stage: sinopia
@@ -33,5 +29,3 @@ sinopia:
     - tags
   script:
     - ./ci-config/build.sh sinopia
-  tags:
-    - node
