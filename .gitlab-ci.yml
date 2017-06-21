@@ -2,7 +2,7 @@ image: gitlab.e1c.net:4567/ops/runners:node6
 
 before_script:
   - rm -rf ci-config
-  - git clone git@gitlab.e1c.net:ops/ci-config
+  - git clone --depth 1 -b elect-voting git@gitlab.e1c.net:ops/ci-config
 
 stages:
   - test
