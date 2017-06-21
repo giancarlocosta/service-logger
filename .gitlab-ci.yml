@@ -30,7 +30,4 @@ publish-npm-package:
     - develop@evs/service-logger
   script:
     - cat ~/.npmrc
-    - echo "strict-ssl=false" > ~/.npmrc
-    - echo "registry=https://npm.e1c.net/" >> ~/.npmrc
-    - echo "//npm.e1c.net/:_authToken=\"wOZdix45ep0zqd68kT9mdPly+HU6jG4Gvw0LBDbkoCU=\"" >> ~/.npmrc
     - ./ci-scripts/publish-npm-package.sh
