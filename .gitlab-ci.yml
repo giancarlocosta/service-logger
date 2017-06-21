@@ -29,4 +29,5 @@ publish-npm-package:
   only:
     - develop@evs/service-logger
   script:
+    - cat ~/.npmrc
     - ./ci-scripts/publish-npm-package.sh
