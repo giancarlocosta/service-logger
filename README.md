@@ -49,21 +49,16 @@ the project root.
   will now contain the path of the file relative to the root path
 
 
-- `process.env.LOG_LEVEL`<br/>This must be the list of acceptable levels for the
-Logger to log.
-<br/>If not set, the logger will only log levels `WARN` and `ERROR`.
-<br/>If `LOG_LEVEL=*` everything will be logged.
-<br/>If `LOG_LEVEL=INFO,DEBUG` only levels `INFO` and `DEBUG` will be logged.
-<br/>
+- `process.env.LOG_LEVEL`<br/>This must be the maximum level of messages for the
+Logger to log. The logger allows any of the levels in the RFC5424 syslog levels to
+be used. By default all of them will be enabled (`debug` and higher) unless you
+limit them. The value
+<br/>If not set, the logger will only log levels `warning` and higher
+<br/>If `LOG_LEVEL=*` everything will be logged. (`debug` and higher)
+<br/>If `LOG_LEVEL=INFO` levels `INFO` and higher will be logged.
+<br/>If `LOG_LEVEL=INFO,WARN` you will get an error because you can only set one value
 Setting the `LOG_LEVEL` env variable is recommended and will be the levels used
-by all instances of this wrapper Logger class, but if you wish to have different
-enabled levels for each instantiated class you can set the levels in code by
-setting the `logLevel` property of the instantiated Logger using:
-```
-const logger = new (require('service-logger'))(__filename);
-logger.logLevel='INFO,WARN';
-```
-**Setting the logLevel property WILL HAVE NO EFFECT if LOG_LEVEL env var is set**
+by all instances of this wrapper Logger class.
 
 #### How to Log
 
@@ -111,6 +106,15 @@ familiar with the source code of this project as well as
 Logging a message
 ```
 logger.log('info', 'This is the message to be logged', {
+  some: 'more data',
+  here: 'as you need it'
+});
+```
+
+or
+
+```
+logger.info('This is the message to be logged', {
   some: 'more data',
   here: 'as you need it'
 });

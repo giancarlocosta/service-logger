@@ -2,20 +2,21 @@
 
 const winston = require('winston');
 winston.emitErrs = false; // winston logger emits errors so supress them
+
 let projectRootPath = undefined;
 
 /**
- * Return filepath following the root path of this project.
- */
+* Return filepath following the root path of this project.
+*/
 function parsePath(filePath) {
   return filePath.split(projectRootPath)[1];
 }
 
 
 /**
- * Return longest common beginning string between all provided strings in
- * 'stringArray'
- */
+* Return longest common beginning string between all provided strings in
+* 'stringArray'
+*/
 function longestCommonStartString(stringArray) {
   const sortedArr = stringArray.concat().sort();
   const shortestString = sortedArr[0];
@@ -29,8 +30,8 @@ function longestCommonStartString(stringArray) {
 }
 
 /**
- * Return current time string in ISO format
- */
+* Return current time string in ISO format
+*/
 function isoTimestamp() {
   return (new Date()).toISOString();
 }
@@ -44,137 +45,153 @@ const winstonLogger = new (winston.Logger)({
     })
   ]
 });
+winstonLogger.setLevels(winston.config.syslog.levels); // Use RFC5424 the syslog levels
 
 
 /**
- * Class wrapper around winston.
- * A new instance of this class should be instantiated in each file that will be
- * doing logging like so:
- *  const logger = new Logger(__filename);
- */
+* Class wrapper around winston.
+* A new instance of this class should be instantiated in each file that will be
+* doing logging like so:
+*  const logger = new Logger(__filename);
+*/
 class Logger {
 
   /**
-   * @constructor
-   * @param {string} filename - Filename to use in log statements
-   */
+  * @constructor
+  * @param {string} filename - Filename to use in log statements
+  */
   constructor(filename) {
     // Only set project root once
     projectRootPath = projectRootPath || process.env.PROJECT_ROOT || longestCommonStartString([__filename, module.parent.filename]);
     const projectRootRelativePath = parsePath(filename);
 
     this._filename = projectRootRelativePath ? projectRootRelativePath : filename;
-    this._logLevel = (process.env.LOG_LEVEL || 'WARN,ERROR').toUpperCase();
+    this._logLevel = (process.env.LOG_LEVEL || 'warning').toLowerCase();
+
+    if (this._logLevel.indexOf('*') !== -1) {
+      this._logLevel = 'debug';
+    } else if (!winston.config.syslog.levels[this._logLevel]) {
+      throw new Error(this._logLevel + ' is not a valid log level. It must be ONE value equal to one of the RFC5424 the syslog levels in Winston');
+    }
+
+    winstonLogger.transports.console.level = this._logLevel;
   }
 
   /**
-   * Set the name of the file this Logger is being used in
-   * @param {string} filename - Filename to use in log statements
-   */
+  * Set the name of the file this Logger is being used in
+  * @param {string} filename - Filename to use in log statements
+  */
   set filename(value) {
     this._filename = value;
   }
 
   /**
-   * Get the name of the file this Logger is being used in (must be set before)
-   * @return {string}
-   */
+  * Get the name of the file this Logger is being used in (must be set before)
+  * @return {string}
+  */
   get filename() {
     return this._filename;
   }
 
   /**
-   * Set the levels that this Logger is allowed to log
-   * @param {string} levels - comma separated string list of levels. See Winston
-   *   documentation for available levels
-   */
-  set logLevel(levels) {
-    this._logLevel = levels.toUpperCase();
+  * Set the levels that this Logger is allowed to log
+  * @param {string} levels - comma separated string list of levels. See Winston
+  *   documentation for available levels
+  */
+  set logLevel(level) {
+    this._logLevel = level.toLowerCase();
+    winstonLogger.transports.console.level = this._logLevel;
   }
 
   /**
-   * Get the levels this Logger is allowed to log
-   * @return {string}
-   */
+  * Get the levels this Logger is allowed to log
+  * @return {string}
+  */
   get logLevel() {
     return this._logLevel;
   }
 
   /**
-   * Get winston instance
-   * @return {string}
-   */
+  * Get winston instance
+  * @return {string}
+  */
   getWinstonInstance() {
     return winston;
   }
 
   /**
-   * Get winston logger instance
-   * @return {string}
-   */
+  * Get winston logger instance
+  * @return {string}
+  */
   getWinstonLoggerInstance() {
     return winstonLogger;
   }
 
-  /**
-   * Function to check if passed level is included (enabled) in env variables
-   * @param {string} level - level to check against env variables
-   * @return {Boolean} true if level enabled
-   */
-  levelEnabled(level) {
-    const enabledLevels = process.env.LOG_LEVEL || this._logLevel;
-    return enabledLevels && typeof level === 'string' && (enabledLevels === '*'
-      || enabledLevels.toUpperCase().indexOf(level.toUpperCase()) !== -1);
-  }
 
   /**
-   * Main logging function that should be used in all files.
-   * @param {string} level - log level to use
-   * @param {string|Error} message - main log message or Error object
-   * @param {Object} [metadata] - object containing any additional information
-   *  you wish to log
-   */
+  * Main logging function that should be used in all files.
+  * @param {string} level - log level to use
+  * @param {string|Error} message - main log message or Error object
+  * @param {Object} [metadata] - object containing any additional information
+  *  you wish to log
+  */
   log(level, message, metadata) {
-    if (this.levelEnabled(level)) {
-      if (message instanceof Error) {
-        this.logError(level, message, metadata);
-      } else {
-        winstonLogger.log(level, message, { file: this._filename, metadata });
-      }
+    if (message instanceof Error) {
+      this.logError(level, message, metadata);
+    } else {
+      const formattedMessage = this._filename + ' - ' + message;
+      winstonLogger.log(level, formattedMessage, metadata || null);
     }
   }
 
   /**
-   * Special function for logging objects that are instances of 'Error' class
-   * @param {string} level - log level to use
-   * @param {Object} err - SHOULD BE an instance of Error class but will accept
-   *   anything
-   * @param {Object} [metadata] - object containing any additional information
-   *  you wish to log
-   */
+  * Special function for logging objects that are instances of 'Error' class
+  * @param {string} level - log level to use
+  * @param {Object} err - SHOULD BE an instance of Error class but will accept
+  *   anything
+  * @param {Object} [metadata] - object containing any additional information
+  *  you wish to log
+  */
   logError(level, err, metadata) {
-    if (this.levelEnabled(level)) {
-      if (err instanceof Error) {
-        winstonLogger.log(level, err.name + ' - ' + err.message + ' - \n' + err.stack, {
-          file: this._filename, metadata
-        });
-      } else {
-        // Probably shouldn't throw non-Error objects
-        winstonLogger.log(level, err, { file: this._filename, metadata });
-      }
+    if (err instanceof Error) {
+      winstonLogger.log(level, this._filename + ' - ' + err.name + ' - ' + err.message + ' - \n' + err.stack, metadata || null);
+    } else {
+      // Probably shouldn't throw non-Error objects
+      const formattedErr = this._filename + ' - ' + JSON.stringify(err);
+      winstonLogger.log(level, formattedErr, metadata || null);
     }
+  }
+
+  debug(message, metadata) {
+    this.log('debug', message, metadata);
   }
 
   info(message, metadata) {
     this.log('info', message, metadata);
   }
 
+  notice(message, metadata) {
+    this.log('notice', message, metadata);
+  }
+
   warn(message, metadata) {
-    this.log('warn', message, metadata);
+    this.log('warning', message, metadata);
   }
 
   error(message, metadata) {
     this.log('error', message, metadata);
+  }
+
+  crit(message, metadata) {
+    this.log('crit', message, metadata);
+  }
+
+  alert(message, metadata) {
+    this.log('alert', message, metadata);
+  }
+
+  emerg(message, metadata) {
+    this.log('emerg', message, metadata);
   }
 
   toString() {
