@@ -26,6 +26,6 @@ semverBump:
 sinopia:
   stage: sinopia
   only:
-    - tags
+    - develop
   script:
     - ./ci-config/build.sh sinopia
