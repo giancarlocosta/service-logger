@@ -1,35 +1,32 @@
-before_script:
-  - rm -rf ci-config
-  - git clone git@gitlab.e1c.net:ops/ci-config
+# Execute on the Node6 runner
+image: gitlab.e1c.net:4567/ops/runners:node6
 
 stages:
   - test
-  - semver
-  - sinopia
+  - increment-version
+  - publish-npm-package
 
-runTests:
+# Grab the helper scripts, and make sure variables are set
+before_script:
+  - git clone --depth 1 git@gitlab.e1c.net:ops/ci-scripts.git
+  - source ci-scripts/set-variables.sh
+
+test:
   stage: test
-  except:
-    - tags
   script:
-    - ./ci-config/build.sh test
-  tags:
-    - node
+    - npm i
+    - npm run test
 
-semverBump:
-  stage: semver
+increment-version:
+  stage: increment-version
   only:
-    - develop
+    - develop@evs/service-logger
   script:
-    - ./ci-config/build.sh semver
-  tags:
-    - node
+    - ci-scripts/increment-version.sh
 
-sinopia:
-  stage: sinopia
+publish-npm-package:
+  stage: publish-npm-package
   only:
-    - tags
+    - develop@evs/service-logger
   script:
-    - ./ci-config/build.sh sinopia
-  tags:
-    - node
+    - ./ci-scripts/publish-npm-package.sh
