@@ -1,6 +1,8 @@
 'use strict';
 
+const context = require('request-context');
 const winston = require('winston');
+
 winston.emitErrs = false; // winston logger emits errors so supress them
 
 let projectRootPath = undefined;
@@ -111,6 +113,14 @@ class Logger {
     return this._logLevel;
   }
 
+  formatMessage(message) {
+    let formatted = this._filename + '-';
+    if (context.get('request:requestId')) {
+      formatted += context.get('request:requestId') + '-';
+    }
+    return formatted + message;
+  }
+
   /**
   * Get winston instance
   * @return {string}
@@ -139,7 +149,7 @@ class Logger {
     if (message instanceof Error) {
       this.logError(level, message, metadata);
     } else {
-      const formattedMessage = this._filename + ' - ' + message;
+      const formattedMessage = this.formatMessage(message);
       winstonLogger.log(level, formattedMessage, metadata || null);
     }
   }
@@ -154,10 +164,11 @@ class Logger {
   */
   logError(level, err, metadata) {
     if (err instanceof Error) {
-      winstonLogger.log(level, this._filename + ' - ' + err.name + ' - ' + err.message + ' - \n' + err.stack, metadata || null);
+      const formattedErr = this.formatMessage(err.name + ' - ' + err.message + ' - \n' + err.stack);
+      winstonLogger.log(level, formattedErr, metadata || null);
     } else {
       // Probably shouldn't throw non-Error objects
-      const formattedErr = this._filename + ' - ' + JSON.stringify(err);
+      const formattedErr = this.formatMessage(JSON.stringify(err));
       winstonLogger.log(level, formattedErr, metadata || null);
     }
   }
