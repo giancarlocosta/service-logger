@@ -114,9 +114,9 @@ class Logger {
   }
 
   formatMessage(message) {
-    let formatted = this._filename + '-';
+    let formatted = this._filename + ' - ';
     if (context.get('request:requestId')) {
-      formatted += context.get('request:requestId') + '-';
+      formatted += context.get('request:requestId') + ' - ';
     }
     return formatted + message;
   }
