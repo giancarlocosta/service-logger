@@ -146,11 +146,12 @@ class Logger {
   *  you wish to log
   */
   log(level, message, metadata) {
+    const lvl = level === 'err' ? 'error' : level;
     if (message instanceof Error) {
-      this.logError(level, message, metadata);
+      this.logError(lvl, message, metadata);
     } else {
       const formattedMessage = this.formatMessage(message);
-      winstonLogger.log(level, formattedMessage, metadata || null);
+      winstonLogger.log(lvl, formattedMessage, metadata || null);
     }
   }
 
@@ -163,13 +164,14 @@ class Logger {
   *  you wish to log
   */
   logError(level, err, metadata) {
+    const lvl = level === 'err' ? 'error' : level;
     if (err instanceof Error) {
       const formattedErr = this.formatMessage(err.name + ' - ' + err.message + ' - \n' + err.stack);
-      winstonLogger.log(level, formattedErr, metadata || null);
+      winstonLogger.log(lvl, formattedErr, metadata || null);
     } else {
       // Probably shouldn't throw non-Error objects
       const formattedErr = this.formatMessage(JSON.stringify(err));
-      winstonLogger.log(level, formattedErr, metadata || null);
+      winstonLogger.log(lvl, formattedErr, metadata || null);
     }
   }
 
@@ -189,7 +191,15 @@ class Logger {
     this.log('warning', message, metadata);
   }
 
+  warning(message, metadata) {
+    this.log('warning', message, metadata);
+  }
+
   error(message, metadata) {
+    this.log('error', message, metadata);
+  }
+
+  err(message, metadata) {
     this.log('error', message, metadata);
   }
 
