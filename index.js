@@ -43,7 +43,13 @@ const winstonLogger = new (winston.Logger)({
   transports: [
     new (winston.transports.Console)({
       timestamp: isoTimestamp,
-      colorize: true
+      colorize: true,
+      formatter: function(options) {
+        // Return string will be passed to logger.
+        return options.timestamp() + ' - ' + options.level.toLowerCase() + ' - ' +
+        (options.message ? options.message : '') + ' ' +
+        (options.meta && Object.keys(options.meta).length ? JSON.stringify(options.meta) : '');
+      }
     })
   ]
 });

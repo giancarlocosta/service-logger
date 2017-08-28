@@ -1,6 +1,6 @@
 {
   "name": "service-logger",
-  "version": "v0.2.8",
+  "version": "v0.2.9",
   "description": "Simplified node microservice logger extending Winston.",
   "license": "",
   "author": "Gian Costa",
