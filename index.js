@@ -1,6 +1,8 @@
 'use strict';
 
+const context = require('request-context');
 const winston = require('winston');
+
 winston.emitErrs = false; // winston logger emits errors so supress them
 
 let projectRootPath = undefined;
@@ -41,7 +43,13 @@ const winstonLogger = new (winston.Logger)({
   transports: [
     new (winston.transports.Console)({
       timestamp: isoTimestamp,
-      colorize: true
+      colorize: true,
+      formatter: function(options) {
+        // Return string will be passed to logger.
+        return options.timestamp() + ' - ' + options.level.toLowerCase() + ' - ' +
+        (options.message ? options.message : '') + ' ' +
+        (options.meta && Object.keys(options.meta).length ? JSON.stringify(options.meta) : '');
+      }
     })
   ]
 });
@@ -111,6 +119,14 @@ class Logger {
     return this._logLevel;
   }
 
+  formatMessage(message) {
+    let formatted = this._filename + ' - ';
+    if (context.get('request:requestId')) {
+      formatted += context.get('request:requestId') + ' - ';
+    }
+    return formatted + message;
+  }
+
   /**
   * Get winston instance
   * @return {string}
@@ -136,10 +152,12 @@ class Logger {
   *  you wish to log
   */
   log(level, message, metadata) {
+    const lvl = level === 'err' ? 'error' : level;
     if (message instanceof Error) {
-      this.logError(level, message, metadata);
+      this.logError(lvl, message, metadata);
     } else {
-      winstonLogger.log(level, message, { file: this._filename, metadata });
+      const formattedMessage = this.formatMessage(message);
+      winstonLogger.log(lvl, formattedMessage, metadata || null);
     }
   }
 
@@ -152,13 +170,14 @@ class Logger {
   *  you wish to log
   */
   logError(level, err, metadata) {
+    const lvl = level === 'err' ? 'error' : level;
     if (err instanceof Error) {
-      winstonLogger.log(level, err.name + ' - ' + err.message + ' - \n' + err.stack, {
-        file: this._filename, metadata
-      });
+      const formattedErr = this.formatMessage(err.name + ' - ' + err.message + ' - \n' + err.stack);
+      winstonLogger.log(lvl, formattedErr, metadata || null);
     } else {
       // Probably shouldn't throw non-Error objects
-      winstonLogger.log(level, err, { file: this._filename, metadata });
+      const formattedErr = this.formatMessage(JSON.stringify(err));
+      winstonLogger.log(lvl, formattedErr, metadata || null);
     }
   }
 
@@ -178,7 +197,15 @@ class Logger {
     this.log('warning', message, metadata);
   }
 
+  warning(message, metadata) {
+    this.log('warning', message, metadata);
+  }
+
   error(message, metadata) {
+    this.log('error', message, metadata);
+  }
+
+  err(message, metadata) {
     this.log('error', message, metadata);
   }
 

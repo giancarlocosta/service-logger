@@ -105,7 +105,7 @@ familiar with the source code of this project as well as
 
 Logging a message
 ```
-logger.log('info', 'This is the message to be logged', {
+logger.info('This is the message to be logged', {
   some: 'more data',
   here: 'as you need it'
 });
@@ -114,7 +114,7 @@ logger.log('info', 'This is the message to be logged', {
 or
 
 ```
-logger.info('This is the message to be logged', {
+logger.log('info', 'This is the message to be logged', {
   some: 'more data',
   here: 'as you need it'
 });
@@ -124,5 +124,5 @@ Logging an Error object
 ```
 const appError = new Error('Uh oh!');
 
-logger.log('warn', appError);
+logger.warn(appError);
 ```

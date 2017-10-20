@@ -4,6 +4,9 @@ const Promise = require('bluebird');
 const expect = require('chai').expect;
 const fs = require('fs-promise');
 
+process.env.LOG_LEVEL = '*';
+
+
 describe('Logger Tests', () => {
 
   before(function(done) {
@@ -24,7 +27,7 @@ describe('Logger Tests', () => {
         let logger = new (require('../index.js'))(__filename);
 
         // Normal logging
-        process.env.LOG_LEVEL = 'INFO,WARN,ERROR';
+        process.env.LOG_LEVEL = 'INFO';
         logger.log('info', 'Basic test');
         logger.log('badLevel', 'Level isnt valid. Should not log');
         logger.log('info', 'Object metadata included', {
@@ -42,14 +45,14 @@ describe('Logger Tests', () => {
         logger.log('error', appError);
 
         // Test env vars
-        process.env.LOG_LEVEL = 'WARN,ERROR';
+        process.env.LOG_LEVEL = 'WARNING';
         logger.log('info', 'INFO not in env var. Shouldnt show');
         process.env.PROJECT_ROOT = 'what?';
         logger = new (require('../index.js'))(__filename);
         logger.log('warn', 'PROJECT_ROOT is not correct. Should show full source file path');
 
         // Set level manually
-        logger.logLevel = 'inFo,WARN,ERROR';
+        logger.logLevel = 'ERROR';
         logger.log('info', 'Set logLevel but no effect because LOG_LEVEL is set');
         process.env.LOG_LEVEL = '';
         logger.log('info', 'Now it should show');
@@ -68,7 +71,7 @@ describe('Logger Tests', () => {
       try {
 
         // Use winston instance to add transports
-        process.env.LOG_LEVEL = 'INFO,WARN,ERROR';
+        process.env.LOG_LEVEL = 'INFO';
         let logger = new (require('../index.js'))(__filename);
         const winston = logger.getWinstonInstance();
         const winstonLogger = logger.getWinstonLoggerInstance();

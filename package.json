@@ -1,6 +1,6 @@
 {
   "name": "service-logger",
-  "version": "v0.2.3",
+  "version": "v0.2.10",
   "description": "Simplified node microservice logger extending Winston.",
   "license": "",
   "author": "Gian Costa",
@@ -27,6 +27,7 @@
   "dependencies": {
     "bluebird": "^3.0.6",
     "fs-promise": "^0.3.1",
+    "request-context": "^2.0.0",
     "winston": "^2.2.0"
   },
   "devDependencies": {
