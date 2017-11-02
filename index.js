@@ -145,7 +145,7 @@ class Logger {
 
 
   /**
-  * Main logging function that should be used in all files.
+  * Main logging function.
   * @param {string} level - log level to use
   * @param {string|Error} message - main log message or Error object
   * @param {Object} [metadata] - object containing any additional information
@@ -153,11 +153,13 @@ class Logger {
   */
   log(level, message, metadata) {
     const lvl = level === 'err' ? 'error' : level;
+    const meta = typeof metadata === 'object' ? metadata : {};
     if (message instanceof Error) {
-      this.logError(lvl, message, metadata);
+      this.logError(lvl, message, meta);
     } else {
-      const formattedMessage = this.formatMessage(message);
-      winstonLogger.log(lvl, formattedMessage, metadata || null);
+      const msg = typeof message === 'object' ? JSON.stringify(message) : message;
+      const formattedMessage = this.formatMessage(msg);
+      winstonLogger.log(lvl, formattedMessage, meta);
     }
   }
 
@@ -171,13 +173,14 @@ class Logger {
   */
   logError(level, err, metadata) {
     const lvl = level === 'err' ? 'error' : level;
+    const meta = typeof metadata === 'object' ? metadata : {};
     if (err instanceof Error) {
       const formattedErr = this.formatMessage(err.name + ' - ' + err.message + ' - \n' + err.stack);
-      winstonLogger.log(lvl, formattedErr, metadata || null);
+      winstonLogger.log(lvl, formattedErr, meta);
     } else {
       // Probably shouldn't throw non-Error objects
       const formattedErr = this.formatMessage(JSON.stringify(err));
-      winstonLogger.log(lvl, formattedErr, metadata || null);
+      winstonLogger.log(lvl, formattedErr, meta);
     }
   }
 
