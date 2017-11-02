@@ -4,11 +4,11 @@
 --------------------------------------------------------------------------------
 ## Overview
 
-This module is a wrapper around Winston meant to **simplify but not limit** how
+This module is a wrapper around Winston meant to simplify, but not limit, how
 business logic does its logging. The class exposed by this module only provides
 convenient functionality wrapped around basic Winston functionality that should
 be needed by microservices in most cases. <br/><br/>
-For special cases it exposes the winston module itself and
+For special cases it also exposes the winston module itself and
 the user can extend and interact with Winston as they would normally. However,
 in these cases it is important that the user understands how to use Winston as
 well as the source code in this project to avoid unexpected behavior.
@@ -16,15 +16,26 @@ well as the source code in this project to avoid unexpected behavior.
 --------------------------------------------------------------------------------
 ## Usage
 <br/>
-**~~ IMPORTANT ENV VARS ~~**
+#### IMPORTANT ENVIRONMENT VARS
 
-In order for the logger to work as you intend, you must set the following ENV
-variables correctly:
+In order for the Logger to work as you intend, you should set the following environment
+variables:
 
-- `process.env.PROJECT_ROOT`<br/>If this is set with the path of the root of the
-project, the logger will use this to show filepaths of the files producing the
+* `process.env.LOG_LEVEL`<br/>
+This must be the maximum level of messages for the
+Logger to log. The Logger allows any of the levels in the RFC5424 syslog levels to
+be used. _All instances of this wrapper Logger class will use the levels specified_.
+  * If `LOG_LEVEL` not set, the Logger will only log levels `warning` and higher.
+  * If `LOG_LEVEL=*` everything will be logged. (`debug` and higher).
+  * If `LOG_LEVEL=INFO` levels `INFO` and higher will be logged.
+  * If `LOG_LEVEL=INFO,WARN` you will get an error because you can only set one value.
+
+
+* `process.env.PROJECT_ROOT` (optional)<br/>
+If this is set with the path of the root of the
+project, the Logger will use this to show filepaths of the files producing the
 log statements relative to the root.
-If this is not set, the logger will attempt to infer the project root by doing
+If this is not set, the Logger will attempt to infer the project root by doing
 the following:
   1. Assume that the service-logger package is somewhere in the project directory,
  (ideally in node_module)
@@ -33,32 +44,15 @@ the following:
   4. The longest common beginning substring of these two paths will be used as the
 the project root.
 
-  For example, if the path of the index.js file in the service-logger package is:
-
-  `/Users/gcosta/Desktop/Team/Projects/security-suite/security-service/node_modules/service-logger/index.js`
-
-  and the first file that the package is required in is:
-
-  `/Users/gcosta/Desktop/Team/Projects/security-suite/security-service/app.js`
-
-  the longest common beginning substring is
-
-  `/Users/gcosta/Desktop/Team/Projects/security-suite/security-service/`
-
+  For example, if the path of the index.js file in the service-logger package is:<br/>
+  `/Users/gcosta/Projects/your-service/node_modules/service-logger/index.js`<br/>
+  and the first file that the package is required in is:<br/>
+  `/Users/gcosta/Projects/your-service/server.js`<br/>
+  the longest common beginning substring is<br/>
+  `/Users/gcosta/Projects/your-service/`<br/>
   so this will be used as the project root and the `file` property in the logs
   will now contain the path of the file relative to the root path
 
-
-- `process.env.LOG_LEVEL`<br/>This must be the maximum level of messages for the
-Logger to log. The logger allows any of the levels in the RFC5424 syslog levels to
-be used. By default all of them will be enabled (`debug` and higher) unless you
-limit them. The value
-<br/>If not set, the logger will only log levels `warning` and higher
-<br/>If `LOG_LEVEL=*` everything will be logged. (`debug` and higher)
-<br/>If `LOG_LEVEL=INFO` levels `INFO` and higher will be logged.
-<br/>If `LOG_LEVEL=INFO,WARN` you will get an error because you can only set one value
-Setting the `LOG_LEVEL` env variable is recommended and will be the levels used
-by all instances of this wrapper Logger class.
 
 #### How to Log
 
@@ -85,27 +79,25 @@ Again, this is not recommended but if it is necessary then make sure you are
 familiar with the source code of this project as well as
 [Winston](https://github.com/winstonjs/winston)
 
-3. Use the logger! From the source code documentation:
-<br/>
-/\*\*
- <br/>\* Special function for logging objects that are instances of 'Error' class
- <br/>\* @param {string} level - log level to use
- <br/>\* @param {string|Error Object} message - main log message or Error object
- <br/>\* @param {Object} [metadata] - object containing any additional information
- <br/>\*  you wish to log
- <br/>\*/
-<br/>log(level, message, metadata) {
-  <br/>
-  ...
-  <br/>
+3. Use the Logger! From the source code documentation:
+```
+/*
+Main logging function
+@param {string} level - log level to use
+@param {string|Error Object} message - main log message or Error object
+@param {Object} [metadata] - object containing any additional information
+you wish to log
+*/
+log(level, message, metadata) {
+     ...
 }
-<br/>
+```
 
-##### Example Usage
+#### Example Usage
 
 Logging a message
 ```
-logger.log('info', 'This is the message to be logged', {
+logger.info('This is the message to be logged', {
   some: 'more data',
   here: 'as you need it'
 });
@@ -114,7 +106,7 @@ logger.log('info', 'This is the message to be logged', {
 or
 
 ```
-logger.info('This is the message to be logged', {
+logger.log('info', 'This is the message to be logged', {
   some: 'more data',
   here: 'as you need it'
 });
@@ -124,5 +116,5 @@ Logging an Error object
 ```
 const appError = new Error('Uh oh!');
 
-logger.log('warn', appError);
+logger.warn(appError);
 ```
