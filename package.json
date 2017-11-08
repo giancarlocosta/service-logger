@@ -1,6 +1,6 @@
 {
   "name": "service-logger",
-  "version": "v0.2.11",
+  "version": "v0.2.12",
   "description": "Simplified node microservice logger extending Winston.",
   "license": "",
   "author": "Gian Costa",
@@ -14,8 +14,8 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha test/*.js",
-    "eslint": "eslint $@ **/*.js *.js",
-    "ci": "npm run eslint && npm run test"
+    "lint": "eslint $@ **/*.js *.js",
+    "ci": "npm run lint && npm run test"
   },
   "eslintConfig": {
     "extends": [
@@ -25,10 +25,10 @@
     ]
   },
   "dependencies": {
-    "bluebird": "^3.0.6",
-    "fs-promise": "^0.3.1",
-    "request-context": "^2.0.0",
-    "winston": "^2.2.0"
+    "bluebird": "3.0.6",
+    "fs-promise": "0.3.1",
+    "request-context": "2.0.0",
+    "winston": "2.2.0"
   },
   "devDependencies": {
     "chai": "^3.4.1",
@@ -40,7 +40,8 @@
     "lib"
   ],
   "pre-commit": [
-    "eslint"
+    "lint",
+    "test"
   ],
   "directories": {
     "test": "test"
