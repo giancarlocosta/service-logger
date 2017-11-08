@@ -22,7 +22,6 @@ describe('Logger Tests', () => {
   it(`should test essential functionality`, (done) => {
     Promise.coroutine(function* () {
       try {
-        // Set project root so no auto inferring process.env.PROJECT_ROOT = __dirname;
         // Infer project root path
         let logger = new (require('../index.js'))(__filename);
 
@@ -34,6 +33,13 @@ describe('Logger Tests', () => {
           prop1: 'p1',
           prop2: 'p2'
         });
+        logger.notice('Throwing Authorization Required error', {
+          summary: 'Level validation failed in afterRemote hook',
+          gian: { hi: 4 }
+        }, 4, 5);
+        logger.notice(`Show a request id`, { requestId: '12345678', otherMetadata: 'yay' });
+        logger.info({ g: { g: [{ g: 1}] }});
+        logger.info({ g: { g: [{ g: 1}] }}, { g: 1});
 
         // Shortcut methods
         logger.info('Basic test');
@@ -43,13 +49,12 @@ describe('Logger Tests', () => {
         // Log Error objects
         const appError = new Error('AppError');
         logger.log('error', appError);
+        logger.warn(appError, { requestId: '12345678' });
 
         // Test env vars
         process.env.LOG_LEVEL = 'WARNING';
-        logger.log('info', 'INFO not in env var. Shouldnt show');
-        process.env.PROJECT_ROOT = 'what?';
         logger = new (require('../index.js'))(__filename);
-        logger.log('warn', 'PROJECT_ROOT is not correct. Should show full source file path');
+        logger.log('warning', 'PROJECT_ROOT is not correct. Should show full source file path');
 
         // Set level manually
         logger.logLevel = 'ERROR';
