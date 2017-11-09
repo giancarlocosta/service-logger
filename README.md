@@ -1,5 +1,5 @@
 # Service-Logger
-> A simplified [Winston](https://github.com/winstonjs/winston) wrapper for microservices :)
+> A simplified [Winston](https://github.com/winstonjs/winston) wrapper for microservices :) 
 
 --------------------------------------------------------------------------------
 ## Overview
