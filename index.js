@@ -2,10 +2,9 @@
 
 const context = require('request-context');
 const winston = require('winston');
+const fs = require('fs');
 
 winston.emitErrs = false; // winston logger emits errors so supress them
-
-let PROJECT_ROOT_PATH;
 
 
 /**
@@ -36,8 +35,8 @@ winstonLogger.setLevels(winston.config.syslog.levels); // Use RFC5424 the syslog
 /**
 * Return filepath following the root path of this project.
 */
-function parsePath(filePath) {
-  return filePath.split(PROJECT_ROOT_PATH)[1];
+function parsePath(filePath, projectRootPath) {
+  return filePath.split(projectRootPath)[1];
 }
 
 
@@ -68,15 +67,21 @@ class Logger {
 
   /**
   * @constructor
-  * @param {string} filename - Filename to use in log statements
+  * @param {string} filepath - filepath to use in log statements
   */
-  constructor(filename) {
-    // Only set project root once
-    PROJECT_ROOT_PATH = PROJECT_ROOT_PATH || longestCommonStartString([__filename, module.parent.filename]);
-    const projectRootRelativePath = parsePath(filename);
+  constructor(filepath) {
 
-    this._filename = projectRootRelativePath ? projectRootRelativePath : filename;
-    this._logLevel = (process.env.LOG_LEVEL || 'warning').toLowerCase();
+    let filepathRelativeToProjectRoot;
+    try {
+      fs.statSync(filepath);
+      const projectRootPath = longestCommonStartString([__filename, module.parent.filename]);
+      filepathRelativeToProjectRoot = parsePath(filepath, projectRootPath);
+    } catch (e) {
+      // If file isn't path, use
+    }
+
+    this._filepath = filepathRelativeToProjectRoot || filepath || __filename;
+    this._logLevel = (process.env.LOG_LEVEL || 'notice').toLowerCase();
 
     if (this._logLevel.indexOf('*') !== -1) {
       this._logLevel = 'debug';
@@ -89,18 +94,18 @@ class Logger {
 
   /**
   * Set the name of the file this Logger is being used in
-  * @param {string} filename - Filename to use in log statements
+  * @param {string} filepath - filepath to use in log statements
   */
-  set filename(value) {
-    this._filename = value;
+  set filepath(value) {
+    this._filepath = value;
   }
 
   /**
   * Get the name of the file this Logger is being used in (must be set before)
   * @return {string}
   */
-  get filename() {
-    return this._filename;
+  get filepath() {
+    return this._filepath;
   }
 
   /**
@@ -122,7 +127,7 @@ class Logger {
   }
 
   formatMessage(message, metadata = {}) {
-    let formatted = this._filename + ' - ';
+    let formatted = this._filepath + ' - ';
     if (context.get('request:requestId')) {
       formatted += context.get('request:requestId') + ' - ';
     } else if (metadata.requestId) {
@@ -149,11 +154,11 @@ class Logger {
 
 
   /**
-  * Main logging function.
-  * @param {string} level - log level to use
-  * @param {string|Error} message - main log message or Error object
-  * @param {Object} [metadata] - object containing any additional information
-  *  you wish to log
+  Main logging function.
+  @param {string} level - RFC5424 syslog level to use
+  @param {string|Error} message - main log message or Error object
+  @param {Object} [metadata] - object containing any additional information
+  you wish to log
   */
   log(level, message, metadata) {
     const lvl = level === 'err' ? 'error' : level;
@@ -229,7 +234,7 @@ class Logger {
   }
 
   toString() {
-    return 'Logger for file: ' + this._filename;
+    return 'Logger for file: ' + this._filepath;
   }
 }
 
