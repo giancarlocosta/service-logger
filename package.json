@@ -1,6 +1,6 @@
 {
   "name": "service-logger",
-  "version": "v0.3.0",
+  "version": "v1.0.0",
   "description": "Simplified NodeJS microservice Winston logger wrapper.",
   "license": "",
   "author": "Gian Costa",
@@ -22,6 +22,7 @@
     ]
   },
   "dependencies": {
+    "debug": "3.1.0",
     "request-context": "2.0.0",
     "winston": "2.2.0"
   },

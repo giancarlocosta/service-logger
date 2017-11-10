@@ -3,16 +3,17 @@
 
 const expect = require('chai').expect;
 
+const INDEX = '../index.js';
 
 describe('Logger Tests', () => {
 
 
-  it(`Normal logging with custom module path in constructor`, (done) => {
+  it(`Normal logging with custom source path in constructor`, (done) => {
 
     let logger;
 
     process.env.LOG_LEVEL = 'INFO';
-    logger = new (require('../index.js'))('my:custom:module:path');
+    logger = new (require(INDEX))('my:custom:source:path');
     logger.info('Basic test');
     logger.log('info', 'Basic test');
 
@@ -20,12 +21,12 @@ describe('Logger Tests', () => {
   });
 
 
-  it(`Normal logging with undefined module path in constructor (results in full path being shown)`, (done) => {
+  it(`Normal logging with undefined source path in constructor (results in full path being shown)`, (done) => {
 
     let logger;
 
     process.env.LOG_LEVEL = 'INFO';
-    logger = new (require('../index.js'))();
+    logger = new (require(INDEX))();
     logger.info('Basic test');
     logger.log('info', 'Basic test');
 
@@ -39,7 +40,7 @@ describe('Logger Tests', () => {
 
     // Normal logging with __filename in constructor
     process.env.LOG_LEVEL = 'INFO';
-    logger = new (require('../index.js'))(__filename); // Infer project root path
+    logger = new (require(INDEX))(__filename); // Infer project root path
     logger.info('Basic test');
     logger.log('info', 'Basic test');
     logger.info('Object metadata included', {
@@ -63,7 +64,7 @@ describe('Logger Tests', () => {
     let logger;
 
     process.env.LOG_LEVEL = 'INFO';
-    logger = new (require('../index.js'))(__filename);
+    logger = new (require(INDEX))(__filename);
     logger.log('info', 'Basic test');
     logger.log('warning', 'Basic test');
     logger.log('error', 'Basic test');
@@ -78,7 +79,7 @@ describe('Logger Tests', () => {
     let logger;
 
     process.env.LOG_LEVEL = 'INFO';
-    logger = new (require('../index.js'))(__filename);
+    logger = new (require(INDEX))(__filename);
     logger.info('Should show info');
 
     // Set level manually
@@ -99,7 +100,7 @@ describe('Logger Tests', () => {
     let logger;
 
     process.env.LOG_LEVEL = '';
-    logger = new (require('../index.js'))(__filename);
+    logger = new (require(INDEX))(__filename);
     logger.info('Should NOT show debug');
     logger.info('Should NOT show info');
     logger.notice('Should show notice');
@@ -115,7 +116,7 @@ describe('Logger Tests', () => {
     let logger;
 
     process.env.LOG_LEVEL = 'INFO';
-    logger = new (require('../index.js'))(__filename);
+    logger = new (require(INDEX))(__filename);
 
     const appError = new Error('AppError');
     logger.error(appError);
@@ -130,7 +131,7 @@ describe('Logger Tests', () => {
 
     // Use winston instance to add transports
     process.env.LOG_LEVEL = 'INFO';
-    let logger = new (require('../index.js'))(__filename);
+    let logger = new (require(INDEX))(__filename);
     const winston = logger.getWinstonInstance();
     const winstonLogger = logger.getWinstonLoggerInstance();
     winstonLogger.add(winston.transports.File, {
@@ -140,7 +141,7 @@ describe('Logger Tests', () => {
 
     logger.log('info', 'Should show in console and file');
 
-    logger = new (require('../index.js'))(__filename);
+    logger = new (require(INDEX))(__filename);
     logger.log('info', 'Should show in console and file also');
 
     done();
@@ -152,7 +153,7 @@ describe('Logger Tests', () => {
     // Use winston instance to add transports
     process.env.LOG_LEVEL = 'WTFFF';
     try {
-      const logger = new (require('../index.js'))(__filename);
+      const logger = new (require(INDEX))(__filename);
       done(new Error('Should throw instatiation error due to bad process.env.LOG_LEVEL'));
     } catch (e) {
       done();
