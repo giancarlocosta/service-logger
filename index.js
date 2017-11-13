@@ -3,6 +3,7 @@
 const context = require('request-context');
 const winston = require('winston');
 const fs = require('fs');
+const debug = require('debug')('service-logger');
 
 winston.emitErrs = false; // winston logger emits errors so supress them
 
@@ -33,31 +34,6 @@ winstonLogger.setLevels(winston.config.syslog.levels); // Use RFC5424 the syslog
 
 
 /**
-* Return filepath following the root path of this project.
-*/
-function parsePath(filePath, projectRootPath) {
-  return filePath.split(projectRootPath)[1];
-}
-
-
-/**
-* Return longest common beginning string between all provided strings in
-* 'stringArray'
-*/
-function longestCommonStartString(stringArray) {
-  const sortedArr = stringArray.concat().sort();
-  const shortestString = sortedArr[0];
-  const longestString = sortedArr[sortedArr.length - 1];
-  const shortestStringLength = shortestString.length;
-  let i = 0;
-  while (i < shortestStringLength && shortestString.charAt(i) === longestString.charAt(i)) {
-    i++;
-  }
-  return shortestString.substring(0, i);
-}
-
-
-/**
 * Class wrapper around winston.
 * A new instance of this class should be instantiated in each file that will be
 * doing logging like so:
@@ -67,21 +43,38 @@ class Logger {
 
   /**
   * @constructor
-  * @param {string} filepath - filepath to use in log statements
+  * @param {string} sourcePath - sourcePath to use in log statements
   */
-  constructor(filepath) {
+  constructor(sourcePath) {
 
+    debug(`sourcePath: ${sourcePath}`);
+
+    // Treat sourcePath as a valid file path. If not a file path use the literal value
     let filepathRelativeToProjectRoot;
     try {
-      fs.statSync(filepath);
-      const projectRootPath = longestCommonStartString([__filename, module.parent.filename]);
-      filepathRelativeToProjectRoot = parsePath(filepath, projectRootPath);
+      debug(`__filename: ${__filename}`);
+      fs.statSync(sourcePath);
+      let projectRootPath = __filename.split('index.js')[0];
+      if (projectRootPath.includes('node_modules/service-logger/')) {
+        projectRootPath = projectRootPath.split('node_modules/service-logger')[0];
+      }
+      debug(`projectRootPath: ${projectRootPath}`);
+
+      if (projectRootPath === '/') {
+        // If project in OS's root dir (/), then filepathRelativeToProjectRoot is everything after /
+        filepathRelativeToProjectRoot = sourcePath.substring(1);
+      } else {
+        // Get filepath relative to the root path of this project.
+        filepathRelativeToProjectRoot = sourcePath.split(projectRootPath)[1];
+      }
     } catch (e) {
-      // If file isn't path, use
+      // If sourcePath isn't file path, use the literal value
     }
 
-    this._filepath = filepathRelativeToProjectRoot || filepath || __filename;
-    this._logLevel = (process.env.LOG_LEVEL || 'notice').toLowerCase();
+    this._sourcePath = filepathRelativeToProjectRoot || sourcePath || 'unknown:source:file';
+    debug(`this._sourcePath: ${this._sourcePath}`);
+
+    this._logLevel = (process.env.LOG_LEVEL || 'info').toLowerCase();
 
     if (this._logLevel.indexOf('*') !== -1) {
       this._logLevel = 'debug';
@@ -94,18 +87,18 @@ class Logger {
 
   /**
   * Set the name of the file this Logger is being used in
-  * @param {string} filepath - filepath to use in log statements
+  * @param {string} sourcePath - sourcePath to use in log statements
   */
-  set filepath(value) {
-    this._filepath = value;
+  set sourcePath(value) {
+    this._sourcePath = value;
   }
 
   /**
   * Get the name of the file this Logger is being used in (must be set before)
   * @return {string}
   */
-  get filepath() {
-    return this._filepath;
+  get sourcePath() {
+    return this._sourcePath;
   }
 
   /**
@@ -126,15 +119,6 @@ class Logger {
     return this._logLevel;
   }
 
-  formatMessage(message, metadata = {}) {
-    let formatted = this._filepath + ' - ';
-    if (context.get('request:requestId')) {
-      formatted += context.get('request:requestId') + ' - ';
-    } else if (metadata.requestId) {
-      formatted += metadata.requestId + ' - ';
-    }
-    return formatted + message;
-  }
 
   /**
   * Get winston instance
@@ -150,6 +134,17 @@ class Logger {
   */
   getWinstonLoggerInstance() {
     return winstonLogger;
+  }
+
+
+  formatMessage(message, metadata = {}) {
+    let formatted = this._sourcePath + ' - ';
+    if (context.get('request:requestId')) {
+      formatted += context.get('request:requestId') + ' - ';
+    } else if (metadata.requestId) {
+      formatted += metadata.requestId + ' - ';
+    }
+    return formatted + message;
   }
 
 
@@ -234,7 +229,7 @@ class Logger {
   }
 
   toString() {
-    return 'Logger for file: ' + this._filepath;
+    return 'Logger for file: ' + this._sourcePath;
   }
 }
 
