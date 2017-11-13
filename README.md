@@ -23,7 +23,7 @@ Before using the logger, read all information below.
 1. **process.env.LOG_LEVEL**<br/>
 In order for the Logger to work as you intend, you should set the
 `process.env.LOG_LEVEL` environment variable. It must be set to the maximum level
-of messages you want the Logger to log. **The level should be one of the _RFC5424_ syslog levels**.
+of messages you want the Logger to log. **The level should be one of the [RFC5424 syslog Severity level keywords](https://en.wikipedia.org/wiki/Syslog)**.
 _All instances of this wrapper Logger class will use this value specified_.
   * If `LOG_LEVEL` not set, the Logger will only log levels `info` and higher.
   * If `LOG_LEVEL=*` everything will be logged. (`debug` and higher).
@@ -78,7 +78,7 @@ Use the Logger! From the source code documentation:
 ```
 /**
 Main logging function.
-@param {string} level - RFC5424 syslog level to use
+@param {string} level - RFC5424 syslog Severity level keyword to use
 @param {string|Error} message - main log message or Error object
 @param {Object} [metadata] - object containing any additional information
 you wish to log
@@ -100,6 +100,10 @@ const logger = new (require('service-logger'))('my:custom:module:path');
 ```
 
 Logging a message:
+```
+logger.<RFC5424 syslog Severity level keyword>('Message');
+```
+<br/>
 ```
 logger.info('Basic test');
 
@@ -128,5 +132,5 @@ Logging an Error object
 ```
 const appError = new Error('Uh oh!');
 
-logger.warn(appError);
+logger.err(appError);
 ```
