@@ -23,9 +23,9 @@ Before using the logger, read all information below.
 1. **process.env.LOG_LEVEL**<br/>
 In order for the Logger to work as you intend, you should set the
 `process.env.LOG_LEVEL` environment variable. It must be set to the maximum level
-of messages you want the Logger to log. **The level should be one of the _RFC5424_ syslog levels**.
+of messages you want the Logger to log. **The level should be one of the [RFC5424 syslog Severity level keywords](https://en.wikipedia.org/wiki/Syslog)**.
 _All instances of this wrapper Logger class will use this value specified_.
-  * If `LOG_LEVEL` not set, the Logger will only log levels `notice` and higher.
+  * If `LOG_LEVEL` not set, the Logger will only log levels `info` and higher.
   * If `LOG_LEVEL=*` everything will be logged. (`debug` and higher).
   * If `LOG_LEVEL=INFO` levels `info` and higher will be logged.
   * If `LOG_LEVEL=INFO,WARNING` you will get an error because you can only set one value.
@@ -43,13 +43,14 @@ a log entry:
 **See [Examples](#examples) below for log entries with request IDs included!**
 <br/><br/>
 
-3. **Log Source File**<br/>
-When instantiating the Loggers there is one argument to pass to the constructor.
-**It is recommended that you pass `__filename`** because the Logger will show
+3. **Log Source Path**<br/>
+When instantiating the Loggers there is one argument to pass to the constructor: `sourcePath`.<br/>
+This value will be used to show the source of the log statement, whether it be a filepath
+or a custom value.<br/>
+**It is recommended that you pass `__filename` (not a string, the Node __filename var!)** because the Logger will show
 filepaths of the files producing the log statements relative to the root of the
-application. If you specify something other than __filename (e.g. 'my:custom:module:path'),
-the logger will just display that instead. If you leave this argument undefined
-the whole file path of the file that the logger is instantiated in will be shown.<br/>
+application. If you specify something other than a valid filepath like __filename (e.g. 'my:custom:module:path'),
+the logger will just display that instead.<br/>
 _See [Examples](#examples) below_
 
 #### How to Log
@@ -77,7 +78,7 @@ Use the Logger! From the source code documentation:
 ```
 /**
 Main logging function.
-@param {string} level - RFC5424 syslog level to use
+@param {string} level - RFC5424 syslog Severity level keyword to use
 @param {string|Error} message - main log message or Error object
 @param {Object} [metadata] - object containing any additional information
 you wish to log
@@ -99,6 +100,10 @@ const logger = new (require('service-logger'))('my:custom:module:path');
 ```
 
 Logging a message:
+```
+logger.<RFC5424 syslog Severity level keyword>('Message');
+```
+<br/>
 ```
 logger.info('Basic test');
 
@@ -127,5 +132,5 @@ Logging an Error object
 ```
 const appError = new Error('Uh oh!');
 
-logger.warn(appError);
+logger.err(appError);
 ```
