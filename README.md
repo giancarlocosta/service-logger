@@ -103,7 +103,7 @@ Logging a message:
 ```
 logger.<RFC5424 syslog Severity level keyword>('Message');
 ```
-<br/>
+-
 ```
 logger.info('Basic test');
 
