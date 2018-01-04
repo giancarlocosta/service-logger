@@ -138,11 +138,12 @@ class Logger {
 
 
   formatMessage(message, metadata = {}) {
+    const meta = (typeof metadata === 'object' && metadata !== null) ? metadata : {};
     let formatted = this._sourcePath + ' - ';
     if (context.get('request:requestId')) {
       formatted += context.get('request:requestId') + ' - ';
-    } else if (metadata.requestId) {
-      formatted += metadata.requestId + ' - ';
+    } else if (meta.requestId) {
+      formatted += meta.requestId + ' - ';
     }
     return formatted + message;
   }
@@ -157,7 +158,7 @@ class Logger {
   */
   log(level, message, metadata) {
     const lvl = level === 'err' ? 'error' : level;
-    const meta = typeof metadata === 'object' ? metadata : {};
+    const meta = (typeof metadata === 'object' && metadata !== null) ? metadata : {};
     if (message instanceof Error) {
       this.logError(lvl, message, meta);
     } else {
