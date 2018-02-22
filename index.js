@@ -108,6 +108,11 @@ class Logger {
   */
   set logLevel(level) {
     this._logLevel = level.toLowerCase();
+    if (this._logLevel.indexOf('*') !== -1) {
+      this._logLevel = 'debug';
+    } else if (!winston.config.syslog.levels[this._logLevel]) {
+      throw new Error(this._logLevel + ' is not a valid log level. It must be ONE value equal to one of the RFC5424 the syslog levels in Winston');
+    }
     winstonLogger.transports.console.level = this._logLevel;
   }
 
@@ -140,10 +145,14 @@ class Logger {
   formatMessage(message, metadata = {}) {
     const meta = (typeof metadata === 'object' && metadata !== null) ? metadata : {};
     let formatted = this._sourcePath + ' - ';
-    if (context.get('request:requestId')) {
-      formatted += context.get('request:requestId') + ' - ';
-    } else if (meta.requestId) {
-      formatted += meta.requestId + ' - ';
+    try {
+      if (context.get('request:requestId')) {
+        formatted += context.get('request:requestId') + ' - ';
+      } else if (meta.requestId) {
+        formatted += meta.requestId + ' - ';
+      }
+    } catch (e) {
+      console.log(`${new Date().toISOString()} - warning - service-logger - Error formatting message: ${e}`);
     }
     return formatted + message;
   }
